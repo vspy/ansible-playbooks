@@ -1,0 +1,55 @@
+server {
+  listen 80;
+  server_name
+    {% for item in email_domains %}
+      mail.{{ item }}
+    {% endfor %};
+
+  rewrite ^ https://$server_name$request_uri? permanent;
+}
+
+server {
+  listen 443 ssl;
+  server_name
+    {% for item in email_domains %}
+      mail.{{ item }}
+    {% endfor %};
+
+  ssl_certificate      /etc/ssl/certs/ssl.crt;
+  ssl_certificate_key  /etc/ssl/private/ssl.key;
+
+  access_log  /var/log/nginx/webmail.access.log;
+  error_log   /var/log/nginx/webmail.error.log;
+
+  root /usr/share/roundcube;
+
+  index index.php index.html;
+
+  location ~ ^/favicon.ico$ {
+    root /usr/share/roundcube/skins/default/images;
+    log_not_found off;
+    access_log off;
+    expires max;
+  }
+
+  location = /robots.txt {
+    allow all;
+    log_not_found off;
+    access_log off;
+  }
+
+  # Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
+  location ~ /\. {
+    deny all;
+    access_log off;
+    log_not_found off;
+  }
+
+  location ~ \.php$ {
+    try_files $uri =404;
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_index index.php;
+  }
+}

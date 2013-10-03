@@ -5,9 +5,12 @@
 - name: Upgrade all safe packages
   apt: upgrade=safe
 
-- name: install ntp
-  action: apt name=ntp
+- name: install common packages
+  action: apt name=$item
+  with_items:
+    - ntp
+    - iptables-persistent
+    - runit
 
-- name: install iptables-persistent
-  action: apt name=iptables-persistent
+- include: ssl.yml
 

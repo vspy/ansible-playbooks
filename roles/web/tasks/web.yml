@@ -1,0 +1,16 @@
+---
+- name: install nginx
+  apt: name=$item state=installed
+  with_items:
+    - nginx
+
+- name: delete default vhost
+  action: file path=/etc/nginx/sites-enabled/default state=absent
+  notify:
+    - restart nginx
+
+- name: generate rails sites
+  action: template src=rails-domain.j2 dest='/etc/nginx/sites-available/{{ item.appname }}'
+  with_items: $rails_domains 
+  notify:
+    - restart nginx

@@ -1,0 +1,9 @@
+---
+- name: install postgresql
+  apt: name=$item state=installed
+  with_items:
+    - postgresql
+    - postgresql-client
+    - libpq-dev
+    - python-psycopg2
+

@@ -1,0 +1,17 @@
+- name: Install Roundcube
+  apt: pkg=$item state=latest
+  with_items:
+    - php-apc
+    - php5-fpm
+    - roundcube
+    - roundcube-pgsql
+
+- name: generate roundcube site
+  action: template src=mail-domain.j2 dest='/etc/nginx/sites-available/roundcube'
+  notify:
+    - restart nginx
+
+- name: enable roundcube site
+  action: file src='/etc/nginx/sites-available/roundcube' dest='/etc/nginx/sites-enabled/roundcube' state=link
+  notify:
+    - restart nginx

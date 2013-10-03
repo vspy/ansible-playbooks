@@ -1,3 +1,5 @@
+roles/common/files/ssl.crt
+roles/common/files/ssl.key
 hosts
 vars/vars.yml
 *.swp

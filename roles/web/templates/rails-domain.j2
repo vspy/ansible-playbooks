@@ -1,0 +1,39 @@
+upstream {{ item.appname }}_unicorn {
+  server unix:/tmp/{{ item.appname }}.socket;
+}
+{% if not (item.wildcard is defined and item.wildcard) %}
+server {
+  listen      80;
+  server_name www.{{ item.name }};
+  rewrite ^ http://{{ item.name }}$request_uri? permanent;
+}
+{% endif %}
+server {
+
+  listen      80;
+
+  {% if not (item.wildcard is defined and item.wildcard) %}
+  server_name {{ item.name }};
+  {% else %}
+  server_name *.{{ item.name }}, {{ item.name }};
+  {% endif %}
+
+  access_log  /var/log/nginx/{{ item.name }}.access.log;
+  error_log   /var/log/nginx/{{ item.name }}.error.log;
+
+  root /rest/u/apps/{{ item.appname }}/current/public;
+
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://{{ item.appname }}_unicorn;
+  }
+
+  location /resources/ {
+    expires 1y;
+    gzip_static on;
+    add_header Cache-Control public; 
+  }
+
+}

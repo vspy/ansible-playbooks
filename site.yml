@@ -1,12 +1,14 @@
 ---
-- name: setups vpn servers
-  hosts: vpn-servers
+- name: setups everything
+  hosts: all
   user: deploy
   gather_facts: False
   sudo: true
   vars_files:
     - vars/vars.yml
-
   roles:
     - common
     - vpn
+    - web
+    - postgres
+    - webmail
