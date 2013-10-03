@@ -1,0 +1,12 @@
+---
+- name: setups
+  hosts: vpn-server
+  user: deploy
+  gather_facts: False
+  sudo: true
+  vars_files:
+    - vars/vars.yml
+
+  roles:
+    - common
+    - vpn

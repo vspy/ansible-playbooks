@@ -1,0 +1,35 @@
+---
+- name: install pptpd
+  apt: name=$item state=installed
+  with_items:
+    - pptpd
+    - dnsmasq
+
+- name: configure dnsmasq
+  action: copy src=dnsmasq.conf dest=/etc/dnsmasq.conf
+  notify:
+    - restart dnsmasq 
+
+- name: configure chap secrets
+  action: template src=chap-secrets.j2 dest=/etc/ppp/chap-secrets
+  notify:
+    - restart pptpd
+
+- name: configure pptpd
+  action: copy src=pptpd.conf dest=/etc/pptpd.conf
+  action: copy src=pptpd-options dest=/etc/ppp/pptpd-options
+  notify:
+    - restart pptpd
+
+- name: enable forwarding
+  action: sysctl name=net.ipv4.ip_forward value=1 state=present
+
+- name: iptables forwarding rules
+  command: $item
+  with_items:
+    - iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+    - iptables -A FORWARD -s 10.8.1.0/24 -j ACCEPT
+    - iptables -A FORWARD -j REJECT
+    - iptables -t nat -A POSTROUTING -s 10.8.1.0/24 -o eth0 -j MASQUERADE
+    - iptables -o eth0 -A FORWARD -p tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 800:1536 -j TCPMSS --clamp-mss-to-pmtu
+    - invoke-rc.d iptables-persistent save

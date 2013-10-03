@@ -1,0 +1,13 @@
+---
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Upgrade all safe packages
+  apt: upgrade=safe
+
+- name: install ntp
+  action: apt name=ntp
+
+- name: install iptables-persistent
+  action: apt name=iptables-persistent
+
