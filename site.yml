@@ -1,5 +1,5 @@
 ---
-- name: setups
+- name: setups vpn servers
   hosts: vpn-servers
   user: deploy
   gather_facts: False
