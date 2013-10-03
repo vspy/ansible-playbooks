@@ -1,0 +1,5 @@
+hosts
+vars/vars.yml
+*.swp
+*.swo
+
